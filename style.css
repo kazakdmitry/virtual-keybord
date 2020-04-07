@@ -25,6 +25,8 @@ td div {
 	font-style: italic;
 
 }
-td > div {
 
+
+span {
+	font-size: 40px;
 }
