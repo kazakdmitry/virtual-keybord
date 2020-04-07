@@ -13,10 +13,10 @@ const keyBordRus = {
   3: [['', 'Shift', 'ShiftLeft'], ['', '\\', 'Backslash'], ['', 'Я', 'KeyZ'], ['', 'Ч', 'KeyX'], ['', 'С', 'KeyC'], ['', 'М', 'KeyV'], ['', 'И', 'KeyB'], ['', 'Т', 'KeyN'], ['', 'Ь', 'KeyM'], ['', 'Б', 'Period'], ['', 'Ю', 'Comma'], ['', '/', 'Slash'], ['', '&uarr;', 'ArrowUp'], ['', 'Shift', 'ShiftRight']],
   4: [['', 'Ctrl', 'ControlLeft'], ['', 'Win', 'MetaLeft'], ['', 'Alt', 'AltLeft'], ['', '', 'Space'], ['', 'Alt', 'AltRight'], ['', 'Ctrl', 'ControlRight'], ['', '&larr;', 'ArrowLeft'], ['', '&darr;', 'ArrowDown'], ['', '&rarr;', 'ArrowRight']],
 };
-const langEng = 'keyBordEng';
-const langRus = 'keyBordRus';
+const langEng = 'keyBordEng(AltLeft + ShiftLeft)';
+const langRus = 'keyBordRus(AltLeft + ShiftLeft)';
 function load() {
-  createKeyBord(keyBordRus, langEng);
+  createKeyBord(keyBordEng, langEng);
 }
 window.onload = load;
 
@@ -47,7 +47,7 @@ function runOnKeys(func, ...codes) {
   document.addEventListener('keydown', function(event) {
     pressed.add(event.code);
 
-    for (let code of codes) { // все ли клавиши из набора нажаты?
+    for (let code of codes) { 
       if (!pressed.has(code)) {
         return;
       }
@@ -60,17 +60,16 @@ function runOnKeys(func, ...codes) {
   document.addEventListener('keyup', function(event) {
     pressed.delete(event.code);
   });
-
 }
 runOnKeys(
-    () => changeLang(),
-    "AltLeft",
-    "ShiftLeft"
+  () => changeLang(),
+  'AltLeft',
+  'ShiftLeft',
 );
 
 function changeLang() {
-  let span = document.querySelectorAll('span');
-  if (span[0].innerText === 'keyBordRus') {
+  const span = document.querySelectorAll('span');
+  if (span[0].innerText === langRus) {
     createKeyBord(keyBordEng, langEng);
   }
   else {
@@ -80,17 +79,28 @@ function changeLang() {
 
 function createKeyBord(lang, typeLang) {
   let cleaner = document.querySelectorAll('body');
-  cleaner[0].innerHTML = '';
-  let span = document.createElement('span');
-  span.innerHTML = typeLang;
-  const textArea = document.createElement('textarea');
+  if (cleaner[0].children[2]) {
+    cleaner[0].children[2].parentNode.removeChild(cleaner[0].children[2]);
+  }
+  if (cleaner[0].children[0]){}
+  else {
+    const textArea = document.createElement('textarea');
+    cleaner[0].append(textArea);
+  }
+  if (cleaner[0].children[1]) {
+    cleaner[0].children[1].innerHTML = typeLang;
+  }
+  else {
+    let span = document.createElement('span');
+    cleaner[0].append(span);
+    span.innerHTML = typeLang;
+  }
+
   const table = document.createElement('table');
   const body = document.getElementsByTagName('body');
-  body[0].append(textArea);
-  body[0].append(span);
-  textArea.onkeydown = keyDownFunc;
-  textArea.onkeyup = keyUpFunc;
-  body[0].append(table);
+  body[0].onkeydown = keyDownFunc;
+  body[0].onkeyup = keyUpFunc;
+  cleaner[0].append(table);
   for (let i = 0; i < 5; i += 1) {
     const tr = document.createElement('tr');
     table.append(tr);
@@ -118,4 +128,16 @@ function createKeyBord(lang, typeLang) {
       div.append(lang[i][k][0]);
     }
   }
+  //table.onclick = clickFunc;
+}
+function clickFunc(event) {
+  event.target.style.backgroundColor = 'yellow';
+  let letter = event.target.childNodes[0].textContent;
+  let textArea = document.querySelectorAll('textarea');
+  if (letter === 'ENTER') {
+    letter = '\n';
+    textArea[0].value += letter;
+  }
+  textArea[0].value += letter;
+  event.target.style.backgroundColor = 'black';
 }
